@@ -1,0 +1,44 @@
+comands
+//inicializa a maquina virutakl
+docker run
+//mostra as imagens do docker
+docker ps
+//mostra as imagens do docker mesmo paradas
+docker ps -a
+//para um container do docker
+docker stop NAMES
+
+//eslint configure
+"eslint.packageManager": "yarn",
+"[javascript]":{
+  "editor.codeActionsOnSave:{
+    "source.fixAll.eslint":true,
+  }
+},
+"[javascriptreact]":{
+  "editor.codeActionsOnSave:{
+    "source.fixAll.eslint":true,
+  }
+},
+
+//arrumar todos os arquivos eslint
+yarn eslint --fix src --ext .js
+
+//create a migrations
+yarn sequelize migration:create --name=create-users
+//rodar migrate
+yarn sequelize db:migrate
+//Revertendo as modificações mais recentes.
+yarn sequelize db:migrate:undo
+//Podendo desfazer para o estado inicial.
+yarn sequelize db:migrate:undo:all
+//Ou pode reverter somente uma migration específica.
+yarn sequelize db:migrate:undo:all --to XXXXXXXXXXXXXX-create-users.js
+//Desfazendo dos seeders mais recentes.
+yarn sequelize db:seed:undo
+//Reverter um seed específico.
+yarn sequelize db:seed:undo --seed name-of-seed-as-in-data
+//Se desfazendo de todos a seeders gerados até o presente momento.
+yarn sequelize db:seed:undo:all
+//rodando a seeders
+yarn sequelize db:sequelize db:seed:all
