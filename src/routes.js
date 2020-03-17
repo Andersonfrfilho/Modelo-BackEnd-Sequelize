@@ -5,6 +5,7 @@ import authMiddleware from './app/middlewares/auth';
 import { multerUploads } from './app/middlewares/multer';
 import FileController from './app/controllers/FileController';
 import { cloudinaryConfig } from './config/cloudinaryConfig';
+import AdminController from './app/controllers/AdminController';
 
 const routes = new Router();
 routes.post('/users', UserController.store);
@@ -14,6 +15,7 @@ routes.post('/sessions', SessionController.store);
 // to que vai antes do middleware passa antes não passa por ele
 // routes.use(authMiddleware);
 routes.put('/users', authMiddleware, UserController.update);
+routes.get('/admins', AdminController.index);
 routes.use('*', cloudinaryConfig);
 routes.post('/uploads', multerUploads, FileController.store);
 export default routes;

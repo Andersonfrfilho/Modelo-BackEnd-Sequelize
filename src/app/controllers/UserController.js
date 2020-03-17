@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import User from '../models/User';
+import Mail from '../../lib/Mail';
 
 class UserController {
   async store(req, res) {
@@ -13,15 +14,32 @@ class UserController {
         .min(6),
       phone: Yup.string().required(),
       type: Yup.string().required(),
+      avatar_id: Yup.string(),
     });
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'validation error' });
     }
-    const userExists = await User.findOne({ where: { email: req.body.email } });
-    if (userExists) {
-      return res.status(400).json({ error: 'User already exist' });
+    const userEmailExists = await User.findOne({
+      where: { email: req.body.email },
+    });
+    if (userEmailExists) {
+      return res.status(400).json({ error: 'User already exist email' });
+    }
+    const userPhoneExists = await User.findOne({
+      where: { phone: req.body.phone },
+    });
+    if (userPhoneExists) {
+      return res.status(400).json({ error: 'User already exist phone' });
     }
     const { id, name, email, phone } = await User.create(req.body);
+    await Mail.sendMail({
+      to: 'anderson fernandes <andersonfrfilho@gmail.com>',
+      subject: 'cadastrou',
+      template: 'confirmation',
+      context: {
+        user: 'aew butão.',
+      },
+    });
     return res.json({ id, name, email, phone });
   }
 
@@ -42,6 +60,7 @@ class UserController {
         (newPassword, field) =>
           newPassword ? field.required().oneOf([Yup.ref('newPassword')]) : field
       ),
+      avatar_id: Yup.string(),
     });
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'validation error' });
@@ -60,6 +79,8 @@ class UserController {
       return res.status(401).json({ error: 'Telephone exist try other' });
     }
     if (oldPassword) {
+      const data = await user.checkPassword(oldPassword);
+      console.log(data);
       if (!(await user.checkPassword(oldPassword))) {
         return res.status(401).json({ error: 'password incorrect' });
       }
