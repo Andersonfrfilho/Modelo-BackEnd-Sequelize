@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 import User from '../models/User';
-import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import ConfirmationMail from '../jobs/ConfirmationMail';
 
 class UserController {
   async store(req, res) {
@@ -32,13 +33,8 @@ class UserController {
       return res.status(400).json({ error: 'User already exist phone' });
     }
     const { id, name, email, phone } = await User.create(req.body);
-    await Mail.sendMail({
-      to: 'anderson fernandes <andersonfrfilho@gmail.com>',
-      subject: 'cadastrou',
-      template: 'confirmation',
-      context: {
-        user: 'aew butão.',
-      },
+    await Queue(ConfirmationMail.key, {
+      name: 'ANderson',
     });
     return res.json({ id, name, email, phone });
   }

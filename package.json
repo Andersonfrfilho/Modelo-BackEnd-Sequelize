@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/server.js",
+    "queue":"nodemon src/queue;js",
     "dev:debug": "nodemon --inspect src/server.js",
     "pretest": "set NODE_ENV=test&&sequelize db:migrate",
     "test": "set NODE_ENV=test&&jest",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "bee-queue": "^1.2.3",
     "cloudinary": "^1.20.0",
     "datauri": "^2.0.0",
     "date-fns": "^2.0.0-beta.5",
