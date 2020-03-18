@@ -2,6 +2,7 @@ import * as Yup from 'yup';
 import User from '../models/User';
 import Queue from '../../lib/Queue';
 import ConfirmationMail from '../jobs/ConfirmationMail';
+import Notification from '../schemas/Notification';
 
 class UserController {
   async store(req, res) {
@@ -20,7 +21,7 @@ class UserController {
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'validation error' });
     }
-    const userEmailExists = await User.findOne({
+    const userEmailExists = await User.finddOne({
       where: { email: req.body.email },
     });
     if (userEmailExists) {
@@ -33,9 +34,13 @@ class UserController {
       return res.status(400).json({ error: 'User already exist phone' });
     }
     const { id, name, email, phone } = await User.create(req.body);
-    await Queue(ConfirmationMail.key, {
-      name: 'ANderson',
+    // notificando
+    await Notification.create({
+      content: 'uhul, vc se cadastrou',
+      user: 3,
     });
+    // enviando email
+    await Queue.add(ConfirmationMail.key, { name: 'nome_fantasia' });
     return res.json({ id, name, email, phone });
   }
 

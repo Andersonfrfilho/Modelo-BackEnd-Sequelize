@@ -1,6 +1,5 @@
+import '../bootstrap';
 import { config, uploader } from 'cloudinary';
-
-require('../bootstrap');
 
 const cloudinaryConfig = (req, res, next) => {
   config({

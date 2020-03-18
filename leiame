@@ -42,3 +42,8 @@ yarn sequelize db:seed:undo --seed name-of-seed-as-in-data
 yarn sequelize db:seed:undo:all
 //rodando a seeders
 yarn sequelize db:sequelize db:seed:all
+
+1º - docker run --name database -e POSTGRES_PASSWORD=102030 -p 5432:5432 -d postgres
+2º - docker run --name mongodatabase -p 27017:27017 -d -t mongo
+  - in chrome localhost:27017
+3º - docker run --name redisqueue -p 6379:6379 -d -t redis:alpine
