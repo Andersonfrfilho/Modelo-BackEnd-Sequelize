@@ -81,7 +81,6 @@ class UserController {
     }
     if (oldPassword) {
       const data = await user.checkPassword(oldPassword);
-      console.log(data);
       if (!(await user.checkPassword(oldPassword))) {
         return res.status(401).json({ error: 'password incorrect' });
       }
