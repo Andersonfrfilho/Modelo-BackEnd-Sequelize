@@ -1,27 +1,25 @@
-import * as Yup from 'yup';
 import User from '../models/User';
 import Queue from '../../lib/Queue';
 import ConfirmationMail from '../jobs/ConfirmationMail';
 import Notification from '../schemas/Notification';
+// import CreateAdminService from '../services/CreateAdminService';
+import Cache from '../../lib/Cache';
 
 class UserController {
-  async store(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string()
-        .email()
-        .required(),
-      password: Yup.string()
-        .required()
-        .min(6),
-      phone: Yup.string().required(),
-      type: Yup.string().required(),
-      avatar_id: Yup.string(),
-    });
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'validation error' });
+  async index(req, res) {
+    // verify exist cache in users
+    const cached = await Cache.get('users');
+    if (cached) {
+      return res.json(cached);
     }
-    const userEmailExists = await User.finddOne({
+    const users = await User.findAll();
+    // service cache (first:name:string, objeto)
+    await Cache.set('users', users);
+    return res.json(users);
+  }
+
+  async store(req, res) {
+    const userEmailExists = await User.findOne({
       where: { email: req.body.email },
     });
     if (userEmailExists) {
@@ -34,6 +32,9 @@ class UserController {
       return res.status(400).json({ error: 'User already exist phone' });
     }
     const { id, name, email, phone } = await User.create(req.body);
+    // invalidar cache
+    await Cache.invalidate('users');
+    // await Cache.invalidatePrefix(`user:${req.userId}:photo`);
     // notificando
     await Notification.create({
       content: 'uhul, vc se cadastrou',
@@ -45,28 +46,11 @@ class UserController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string().email(),
-      phone: Yup.string().required(),
-      type: Yup.string().required(),
-      oldPassword: Yup.string().min(6),
-      newPassword: Yup.string()
-        .min(6)
-        .when('oldPassword', (oldPassword, field) =>
-          oldPassword ? field.required() : field
-        ),
-      confirmNewPassword: Yup.string().when(
-        'newPassword',
-        (newPassword, field) =>
-          newPassword ? field.required().oneOf([Yup.ref('newPassword')]) : field
-      ),
-      avatar_id: Yup.string(),
-    });
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'validation error' });
-    }
     const { name, phone, email, type, oldPassword } = req.body;
+    // separeted logic in services
+    // const appointment = await CreateAdminService.run({
+    //   admin_id: id,
+    // });
     const user = await User.findByPk(req.userId);
     if (user.type !== 'admin') {
       return res.status(401).json({ error: 'User not autorized' });
@@ -85,6 +69,7 @@ class UserController {
         return res.status(401).json({ error: 'password incorrect' });
       }
       const userModified = await user.update(req.body);
+      await Cache.invalidate('users');
       return res.json(userModified);
     }
   }

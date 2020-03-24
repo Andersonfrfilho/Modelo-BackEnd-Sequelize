@@ -1,5 +1,10 @@
 import './bootstrap';
 import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import redis from 'redis';
+import RateLimit from 'express-rate-limit';
+import RateLimitRedis from 'rate-limit-redis';
 import * as Sentry from '@sentry/node';
 import Youch from 'youch';
 import 'express-async-errors';
@@ -18,7 +23,31 @@ class App {
 
   middlewares() {
     this.server.use(Sentry.Handlers.requestHandler());
+    // this.server.use(cors({origin:'link da aplicação}));
+    this.server.use(
+      cors({
+        origin: false, // todos acessam
+      })
+    );
+    this.server.use(helmet());
     this.server.use(express.json());
+    // limita as requisições do usuario
+    if (process.env.NODE_ENV !== 'development') {
+      this.server.use(
+        new RateLimit({
+          store: new RateLimitRedis({
+            client: redis.createClient({
+              host: process.env.REDIS_HOST,
+              port: process.env.REDIS_PORT,
+            }),
+          }),
+          // mil milissegundos vezes 60 da um minuto vezes 15 15 minutos
+          windowMs: 1000 * 60 * 15,
+          // 100 requisições
+          max: 100,
+        })
+      );
+    }
   }
 
   routes() {

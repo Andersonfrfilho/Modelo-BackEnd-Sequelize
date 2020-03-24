@@ -58,3 +58,4 @@ sem docker
   3-sudo apt-get install redis-server
   4-redis-cli -v
   5-sudo service redis-server restart
+git remote add deploy endereço git
