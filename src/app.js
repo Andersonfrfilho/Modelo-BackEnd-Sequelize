@@ -11,29 +11,46 @@ import 'express-async-errors';
 import routes from './routes';
 import './database';
 import sentryConfig from './config/sentry';
+import io from 'socket.io';
+import http from 'http';
 
 class App {
   constructor() {
-    this.server = express();
+    this.app = express();
+    this.server = http.Server(this.app);
     Sentry.init(sentryConfig);
     this.middlewares();
     this.routes();
     this.exceptionHandler();
+    // todos usuarios connectados
+    this.connectedUsers = {};
+  }
+
+  socket() {
+    this.io = io(this.server);
+    this.io.on('connection', socket => {
+      const { user_id } = socket.handshake.query;
+      this.connectedUsers[user_id] = socket.id;
+      socket.on('disconnect', () => {
+        delete this.connectedUsers[user_id];
+      });
+    });
   }
 
   middlewares() {
-    this.server.use(Sentry.Handlers.requestHandler());
-    // this.server.use(cors({origin:'link da aplicação}));
-    this.server.use(
-      cors({
-        origin: false, // todos acessam
-      })
-    );
-    this.server.use(helmet());
-    this.server.use(express.json());
+    this.app.use(Sentry.Handlers.requestHandler());
+    // this.app.use(cors({origin:'link da aplicação}));
+    this.app.use(cors({ origin: false }));
+    this.app.use((req, res, next) => {
+      req.io = this.io;
+      req.connectedUsers = this.connectedUsers;
+      next();
+    });
+    this.app.use(helmet());
+    this.app.use(express.json());
     // limita as requisições do usuario
     if (process.env.NODE_ENV !== 'development') {
-      this.server.use(
+      this.app.use(
         new RateLimit({
           store: new RateLimitRedis({
             client: redis.createClient({
@@ -51,12 +68,12 @@ class App {
   }
 
   routes() {
-    this.server.use(routes);
-    this.server.use(Sentry.Handlers.errorHandler());
+    this.app.use(routes);
+    this.app.use(Sentry.Handlers.errorHandler());
   }
 
   exceptionHandler() {
-    this.server.use(async (err, req, res, next) => {
+    this.app.use(async (err, req, res, next) => {
       if (process.env.NODE_ENV === 'development') {
         const errors = await new Youch(err, req).toJSON();
         return res.status(500).json(errors);

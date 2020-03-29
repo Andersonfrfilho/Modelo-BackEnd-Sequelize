@@ -1,14 +1,13 @@
 import jwt from 'jsonwebtoken';
-import authConfig from '../../config/auth';
-import User from '../models/User';
+import authConfig from '../../../config/auth';
+import User from '../../models/User';
 
 class SessionController {
   async store(req, res) {
     const { email, password } = req.body;
     const user = await User.findOne({
       where: {
-        email,
-        // permission: 'admin'
+        email: email.toLowerCase(),
       },
     });
     if (!user) {

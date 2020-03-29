@@ -1,3 +1,4 @@
-import userFactory from './user.factories';
+import userFactory from './user.factory';
+import fileFactory from './file.factory';
 
-export { userFactory };
+export { userFactory, fileFactory };

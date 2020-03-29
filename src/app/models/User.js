@@ -24,6 +24,12 @@ class User extends Model {
         user.password_hash = await bcrypt.hash(user.password, 8);
       }
     });
+    this.addHook('beforeCreate', async user => {
+      user.name = user.name.toLowerCase();
+      user.phone = user.phone.toLowerCase();
+      user.email = user.email.toLowerCase();
+      user.type = user.type.toLowerCase();
+    });
     return this;
   }
 

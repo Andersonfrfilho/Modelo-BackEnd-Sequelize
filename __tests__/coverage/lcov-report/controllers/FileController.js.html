@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for middlewares/auth.js</title>
+    <title>Code coverage report for controllers/FileController.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,20 +19,20 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">middlewares</a> auth.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">controllers</a> FileController.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">47.06% </span>
+                <span class="strong">46.67% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>8/17</span>
+                <span class='fraction'>7/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.67% </span>
+                <span class="strong">37.5% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/6</span>
+                <span class='fraction'>3/8</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">30.77% </span>
+                <span class="strong">38.46% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/13</span>
+                <span class='fraction'>5/13</span>
             </div>
         
             
@@ -75,42 +75,57 @@
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import jwt from 'jsonwebtoken';
-import { promisify } from 'util';
-import authConfig from '../../config/auth';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// import Imagem from '../models/Imagem';<span class="branch-1 cbranch-no" title="branch not covered" ></span>
+import { dataUri } from '../middlewares/multer';
+import { uploader } from '../../config/cloudinaryConfig';
+import File from '../models/File';
 &nbsp;
-export default asyn<span class="fstat-no" title="function not covered" >c </span>(req, res, next) =&gt; {
-  const authHeader = <span class="cstat-no" title="statement not covered" >req.headers.authorization;</span>
-<span class="cstat-no" title="statement not covered" >  if (!authHeader) {</span>
-<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ error: 'Token not provider' });</span>
+class FileController {
+<span class="fstat-no" title="function not covered" >  as</span>ync store(req, res) {
+<span class="cstat-no" title="statement not covered" >    if (!req.file) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: 'erro ao subir arquivo' });</span>
+    }
+    const file = <span class="cstat-no" title="statement not covered" >dataUri(req).content;</span>
+    const { url } = <span class="cstat-no" title="statement not covered" >await uploader.upload(file);</span>
+<span class="cstat-no" title="statement not covered" >    if (!url) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: 'erro ao subir imagem' });</span>
+    }
+&nbsp;
+    const newFile = <span class="cstat-no" title="statement not covered" >await File.create({</span>
+      url,
+    });
+<span class="cstat-no" title="statement not covered" >    return res.status(200).json(newFile);</span>
   }
-  const [, token] = <span class="cstat-no" title="statement not covered" >authHeader.split(' ');</span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
-    const decoded = <span class="cstat-no" title="statement not covered" >await promisify(jwt.verify)(token, authConfig.secret);</span>
-<span class="cstat-no" title="statement not covered" >    req.userId = decoded.id;</span>
-  } catch (error) {
-<span class="cstat-no" title="statement not covered" >    return res.status(401).json({ error: 'Token invalido' });</span>
-  }
-<span class="cstat-no" title="statement not covered" >  return next();</span>
-};
+}
+export default new FileController();
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

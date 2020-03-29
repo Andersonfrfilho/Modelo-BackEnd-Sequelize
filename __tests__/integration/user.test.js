@@ -1,35 +1,150 @@
 import request from 'supertest';
 import bcrypt from 'bcryptjs';
+import { object } from 'yup';
 import app from '../../src/app';
 import truncate from '../util/truncate';
-import { userFactory } from '../factory';
+import { userFactory, fileFactory } from '../factory';
 
 describe('User', () => {
   beforeEach(async () => {
     await truncate();
   });
-  it('should be able to register', async () => {
-    const user = await userFactory.attrs('User');
-    const response = await request(app)
+  it('1.  - should be able to register user', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      avatar_id: logoId,
+      confirmPassword: attributes.password,
+    };
+    const { body: responseUser } = await request(app)
       .post('/users')
-      .send(user);
-    expect(response.body).toHaveProperty('id');
+      .send(newUser);
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        avatar_id: expect.any(Number),
+      })
+    );
   });
-  it('should not be able to register with duplicate email', async () => {
-    const user = await userFactory.attrs('User');
-    await request(app)
+  it('1.1   - should not be able to register user without fields valids', async () => {
+    const responseUser = await request(app)
       .post('/users')
-      .send(user);
-    const response = await request(app)
-      .post('/users')
-      .send(user);
-    expect(response.status).toBe(400);
+      .send();
+    expect(responseUser.status).toEqual(400);
   });
-  it('should encrypt user password when new user created', async () => {
-    const user = await userFactory.create('User', {
-      password: '123',
-    });
-    const compareHash = await bcrypt.compare('123', user.password_hash);
-    expect(compareHash).toBe(true);
+  it('1.1.1 - should not be able to register user without fields valids specified (name)', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      name: null,
+      confirmPassword: attributes.password,
+      avatar_id: logoId,
+    };
+    const responseUser = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser.status).toEqual(400);
+  });
+  it('1.1.2 - should not be able to register user without fields valids specified (email)', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      email: null,
+      confirmPassword: attributes.password,
+      avatar_id: logoId,
+    };
+    const responseUser = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser.status).toEqual(400);
+  });
+  it('1.1.3 - should not be able to register user without fields valids specified (phone)', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      phone: null,
+      avatar_id: logoId,
+      confirmPassword: attributes.password,
+    };
+    const responseUser = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser.status).toEqual(400);
+  });
+  it('1.1.4 - should not be able to register user without fields valids specified (password)', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      password: null,
+      avatar_id: logoId,
+    };
+    const responseUser = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser.status).toEqual(400);
+  });
+  it('1.1.5 - should not be able to register user without fields valids specified (type)', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      type: null,
+      confirmPassword: attributes.password,
+      avatar_id: logoId,
+    };
+    const responseUser = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser.status).toEqual(400);
+  });
+  it('1.2 - The user can register with a non-existent image but it will have the value of null or inexistent', async () => {
+    const logoId = 20;
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      confirmPassword: attributes.password,
+      avatar_id: logoId,
+    };
+    const { body: responseUser } = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        avatar_id: expect.any(Object),
+      })
+    );
+  });
+  it('1.3 - The user can register with a non-existent image but it will have the value of null or inexistent', async () => {
+    const logoId = 20;
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      confirmPassword: attributes.password,
+      avatar_id: logoId,
+    };
+    const { body: responseUser } = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        avatar_id: expect.any(Object),
+      })
+    );
   });
 });
