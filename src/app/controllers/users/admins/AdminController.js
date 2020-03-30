@@ -44,7 +44,7 @@ class AdminController {
     const { id } = await User.create(newUser);
     // invalidando os caches
     await Cache.invalidate('users');
-    await Cache.invalidatePrefix('user:admins:page:');
+    await Cache.invalidatePrefix('users:admins:page');
     // criando notificação
 
     const notification = await Notification.create({
@@ -70,7 +70,7 @@ class AdminController {
       order = ['name'],
     } = req.query;
     // personalizando cache
-    const cacheKey = `user:admins:page:${page}`;
+    const cacheKey = `users:admins:page:${page}`;
 
     const cached = await Cache.get(cacheKey);
     if (cached) {
@@ -149,7 +149,7 @@ class AdminController {
     const userModified = await user.update({ ...req.body, avatar_id: logo });
     // invalidando os caches
     await Cache.invalidate('users');
-    await Cache.invalidatePrefix('user:admins:page:');
+    await Cache.invalidatePrefix('users:admins:page');
     // criando notificação
 
     const notification = await Notification.create({
@@ -162,6 +162,30 @@ class AdminController {
       req.io.to(ownerSocket).emit('notification', notification);
     }
     return res.json(userModified);
+  }
+
+  async destroy(req, res) {
+    await AdminCheckService.run({
+      admin_id: req.userId,
+    });
+    const { id } = req.params;
+    // personalizando cache
+    const deleteUser = await User.findByPk(id);
+    // invalidando os caches
+    await Cache.invalidate('users');
+    await Cache.invalidatePrefix('users:admins:page');
+    // criando notificação
+
+    const notification = await Notification.create({
+      content: `O usuario ${deleteUser.name}, seu usuario foi deletado com sucesso`,
+      user: id,
+    });
+    // // trabalahndo com socket.io
+    const ownerSocket = req.connectedUsers[id];
+    if (ownerSocket) {
+      req.io.to(ownerSocket).emit('notification', notification);
+    }
+    return res.json(deleteUser);
   }
 }
 export default new AdminController();
