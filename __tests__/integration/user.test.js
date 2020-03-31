@@ -147,4 +147,32 @@ describe('User', () => {
       })
     );
   });
+  it('2.  - The user can list the all user register with pages', async () => {
+    await userFactory.createMany('User', 20);
+    const { body: responseUser } = await request(app).get('/users');
+    expect(responseUser).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(Number),
+          name: expect.any(String),
+          email: expect.any(String),
+          phone: expect.any(String),
+          avatar_id: expect.any(Object),
+        }),
+      ])
+    );
+  });
+  it('3. - The user can list the especified user register with', async () => {
+    const { id } = await userFactory.create('User');
+    const { body: responseUser } = await request(app).get('/users/:id');
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        avatar_id: expect.any(Object),
+      })
+    );
+  });
 });

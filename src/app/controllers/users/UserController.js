@@ -54,10 +54,14 @@ class UserController {
     } = req.query;
     const cacheKey = `user:${req.userId}pages:${page}`;
     const userList = await User.findAll({
-      where: {
-        permissao: 'mestre',
-      },
-      attributes: ['id', 'name', 'email', 'phone'],
+      attributes: ['id', 'name', 'email', 'avatar_id', 'type'],
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['url'],
+        },
+      ],
       limit: pageSize,
       filter,
       offset: (page - 1) * pageSize,
@@ -75,37 +79,28 @@ class UserController {
     if (cached) {
       return res.json(cached);
     }
-    const {
-      page = 1,
-      pageSize = 10,
-      filter = '',
-      order = ['email'],
-    } = req.query;
-    const userList = await User.findAll({
-      where: {
-        permissao: 'mestre',
-      },
-      attributes: ['id', 'name', 'email', 'phone'],
-      limit: pageSize,
-      filter,
-      offset: (page - 1) * pageSize,
-      order,
+    const { id } = req.params;
+
+    const userEspecified = await User.findByPk(id, {
+      attributes: ['id', 'name', 'email', 'avatar_id', 'type'],
+      order: 'id',
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['url'],
+        },
+      ],
     });
     // service cache (first:name:string, objeto)
-    await Cache.set('user', userList);
-    return res.json(userList);
+    await Cache.set('user', userEspecified);
+    return res.json(userEspecified);
   }
 
   async update(req, res) {
+    const { id } = req.params;
     const { name, phone, email, type, oldPassword } = req.body;
-    // separeted logic in services
-    // const appointment = await CreateAdminService.run({
-    //   admin_id: id,
-    // });
-    const user = await User.findByPk(req.userId);
-    if (user.type !== 'admin') {
-      return res.status(401).json({ error: 'User not autorized' });
-    }
+    const user = await User.findByPk(id);
     const emailExist = await User.findOne({ where: { email } });
     if (emailExist) {
       return res.status(401).json({ error: 'Email exist try other' });
@@ -115,7 +110,6 @@ class UserController {
       return res.status(401).json({ error: 'Telephone exist try other' });
     }
     if (oldPassword) {
-      const data = await user.checkPassword(oldPassword);
       if (!(await user.checkPassword(oldPassword))) {
         return res.status(401).json({ error: 'password incorrect' });
       }

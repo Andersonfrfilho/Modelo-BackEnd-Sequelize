@@ -38,6 +38,9 @@ routes.put(
   validateUserAdminUpdate,
   AdminController.update
 );
+routes.post('/users', UserController.store);
+routes.get('/users', UserController.index);
+routes.get('/users/:id', UserController.show);
 // middleware local
 // routes.put('/users', authMiddleware, UserController.update);
 // to que vai antes do middleware passa antes não passa por ele
