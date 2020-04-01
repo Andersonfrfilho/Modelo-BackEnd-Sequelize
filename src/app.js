@@ -49,7 +49,10 @@ class App {
     this.app.use(helmet());
     this.app.use(express.json());
     // limita as requisições do usuario
-    if (process.env.NODE_ENV !== 'development') {
+    if (
+      process.env.NODE_ENV !== 'development' &&
+      process.env.NODE_ENV !== 'test'
+    ) {
       this.app.use(
         new RateLimit({
           store: new RateLimitRedis({

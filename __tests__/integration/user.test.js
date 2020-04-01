@@ -4,6 +4,7 @@ import { object } from 'yup';
 import app from '../../src/app';
 import truncate from '../util/truncate';
 import { userFactory, fileFactory } from '../factory';
+import Cache from '../../src/lib/Cache';
 
 describe('User', () => {
   beforeEach(async () => {
@@ -147,8 +148,33 @@ describe('User', () => {
       })
     );
   });
+  it('1.4 - The user can do register with email existent', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      avatar_id: logoId,
+      confirmPassword: attributes.password,
+    };
+    const { body: responseUser } = await request(app)
+      .post('/users')
+      .send(newUser);
+    const responseUserTwo = await request(app)
+      .post('/users')
+      .send(newUser);
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        avatar_id: expect.any(Number),
+      })
+    );
+    expect(responseUserTwo.status).toEqual(400);
+  });
   it('2.  - The user can list the all user register with pages', async () => {
-    await userFactory.createMany('User', 20);
+    await userFactory.create('User');
     const { body: responseUser } = await request(app).get('/users');
     expect(responseUser).toEqual(
       expect.arrayContaining([
@@ -164,7 +190,7 @@ describe('User', () => {
   });
   it('3. - The user can list the especified user register with', async () => {
     const { id } = await userFactory.create('User');
-    const { body: responseUser } = await request(app).get('/users/:id');
+    const { body: responseUser } = await request(app).get(`/users/${id}`);
     expect(responseUser).toEqual(
       expect.objectContaining({
         id: expect.any(Number),
@@ -172,6 +198,39 @@ describe('User', () => {
         email: expect.any(String),
         phone: expect.any(String),
         avatar_id: expect.any(Object),
+      })
+    );
+  });
+  it('4. - The user can updated information', async () => {
+    const { id: logoId } = await fileFactory.create('File');
+    const attributes = await userFactory.attrs('User');
+    const newUser = {
+      ...attributes,
+      avatar_id: logoId,
+      confirmPassword: attributes.password,
+    };
+    const { body: user } = await request(app)
+      .post(`/users`)
+      .send(newUser);
+    const attributesUserModified = await userFactory.attrs('User');
+    const newUserModified = {
+      ...attributesUserModified,
+      avatar_id: logoId,
+      oldPassword: attributes.password,
+      newPassword: attributesUserModified.password,
+      confirmNewPassword: attributesUserModified.password,
+    };
+    const { body: responseUser } = await request(app)
+      .put(`/users/${user.id}`)
+      .send(newUserModified);
+    expect(responseUser).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        phone: expect.any(String),
+        type: expect.any(String),
+        avatar_id: expect.any(Number),
       })
     );
   });
