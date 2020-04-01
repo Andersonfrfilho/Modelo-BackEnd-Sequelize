@@ -7,12 +7,12 @@ import RateLimit from 'express-rate-limit';
 import RateLimitRedis from 'rate-limit-redis';
 import * as Sentry from '@sentry/node';
 import Youch from 'youch';
+import io from 'socket.io';
+import http from 'http';
 import 'express-async-errors';
 import routes from './routes';
 import './database';
 import sentryConfig from './config/sentry';
-import io from 'socket.io';
-import http from 'http';
 
 class App {
   constructor() {
@@ -77,7 +77,10 @@ class App {
 
   exceptionHandler() {
     this.app.use(async (err, req, res, next) => {
-      if (process.env.NODE_ENV === 'development') {
+      if (
+        process.env.NODE_ENV !== 'development' &&
+        process.env.NODE_ENV !== 'test'
+      ) {
         const errors = await new Youch(err, req).toJSON();
         return res.status(500).json(errors);
       }
