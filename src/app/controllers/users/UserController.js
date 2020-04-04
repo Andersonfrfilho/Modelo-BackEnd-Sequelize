@@ -9,7 +9,7 @@ import Cache from '../../../lib/Cache';
 class UserController {
   async store(req, res) {
     const userEmailExists = await User.findOne({
-      where: { email: req.body.email },
+      where: { email: req.body.email.toLowerCase() },
     });
     if (userEmailExists) {
       return res.status(400).json({ error: 'User already exist email' });
@@ -110,13 +110,15 @@ class UserController {
     const { id } = req.params;
     const { name, phone, email, type, oldPassword } = req.body;
     const user = await User.findByPk(id);
-    const emailExist = await User.findOne({ where: { email } });
+    const emailExist = await User.findOne({
+      where: { email: email.toLowerCase() },
+    });
     if (emailExist) {
-      return res.status(401).json({ error: 'Email exist try other' });
+      return res.status(400).json({ error: 'Email exist try other' });
     }
     const phoneExist = await User.findOne({ where: { phone } });
     if (phoneExist) {
-      return res.status(401).json({ error: 'Telephone exist try other' });
+      return res.status(400).json({ error: 'Telephone exist try other' });
     }
     if (!(await user.checkPassword(oldPassword))) {
       return res.status(401).json({ error: 'password incorrect' });
