@@ -43,8 +43,8 @@ class AdminController {
     };
     const { id } = await User.create(newUser);
     // invalidando os caches
-    await Cache.invalidate('users');
-    await Cache.invalidatePrefix('users:admins:page');
+    // await Cache.invalidate('users');
+    // await Cache.invalidatePrefix('users:admins:page');
     // criando notificação
 
     const notification = await Notification.create({
@@ -56,7 +56,7 @@ class AdminController {
     if (ownerSocket) {
       req.io.to(ownerSocket).emit('notification', notification);
     }
-    return res.json(newUser);
+    return res.json({ ...newUser, id });
   }
 
   async index(req, res) {
