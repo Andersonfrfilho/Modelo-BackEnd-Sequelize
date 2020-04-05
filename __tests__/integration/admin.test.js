@@ -248,7 +248,9 @@ describe('Admin', () => {
         email: expect.any(String),
         avatar_id: expect.any(Number),
         type: expect.any(String),
-        avatar: expect.any({ url: expect.any(String) }),
+        password: expect.any(String),
+        phone: expect.any(String),
+        // avatar: expect.objectContaining({ url: expect.any(String) }),
       })
     );
     expect(responseUserShow).toEqual(
@@ -256,9 +258,9 @@ describe('Admin', () => {
         id: expect.any(Number),
         name: expect.any(String),
         email: expect.any(String),
-        phone: expect.any(String),
         avatar_id: expect.any(Number),
         type: expect.any(String),
+        avatar: expect.objectContaining({ url: expect.any(String) }),
       })
     );
   }, 30000);
